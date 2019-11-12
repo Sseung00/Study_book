@@ -1,0 +1,28 @@
+package 패키지 경로;
+
+import java.io.IOException;
+
+public class ClassName extends sampleEx implements sampleInterface{
+  //변수선언
+  public String test;
+
+  //생성자
+  public ClassName(){ super();  }
+  public ClassName(String s){  //인자가 있는 생성자 }
+
+  //Setter, Getter 선언부
+  public void setTest(String string){  test = string; }
+  public String getTest(){  return test;  }
+
+  //class의 메소드 생성부
+  public void printing(String s){
+    System.out.println("test: " + s); //console Out
+  }
+  //class의 main메소드 생성부
+  public static void main(String[] args){
+    ClassName testClass = new ClassName();
+
+    testClass.setTest("default");
+    testClass.printing("test out");
+  }
+}
