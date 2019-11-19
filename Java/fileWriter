@@ -1,0 +1,32 @@
+public static void main(String[] args){
+    String targetFileDir = "C:/User/Sally/Document/FileOutTest/test.txt";
+    File targetDir = new File(targetFileDir);
+    if(!targetDir.exists()){    //if there is no file in path, make new one
+        targetDir.mkdirs();
+    }
+    FileWriter fw = null;
+    List<String> logs = null;
+    String result = saveLog(logs, targetFileDir);
+    System.out.println("result of save logs: " + result);
+}
+public String saveLog(List<String> logs, String filePath){
+    try{
+        FileWriter fw = new FileWriter(filePath);
+        for(int i = 0 ; i < logs.size() ; ++i){
+            fw.write(logs.get(i).trim() + "\n");
+        }
+        return "Success";
+    }catch(FileNotFoundException ex){
+        return "FileNotFoundException";
+    }catch(IOException e){
+        return "IOException";
+    }finally{
+        if(fw != null){
+            try{
+                fw.close();
+            }catch(Exception e){
+                return "Exception";                
+            }
+        }
+    }
+}
