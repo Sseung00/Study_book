@@ -1,0 +1,23 @@
+public ArrayList<StructForFileList> searchFileList (String rootPath, ArrayList<StructForFileList> fileList){
+    try{
+        File root = new File(rootPath);
+        if(root.isDirectory()){
+            File[] files = root.listFiles();
+            for(int i = 0 ; i < files.length ; ++i){
+                if(files[i].isDirectory()){
+                    //self call
+                    searchFileList(files[i].getPath(), fileList);
+                } else{
+                    if(files[i].getName().indexOf(".jpg") > -1){
+                        /////////////////
+                        // custom here //
+                        /////////////////
+                    }
+                }
+            }
+        }
+    }catch (Exception e){
+        e.printStackTrace();
+    }
+    return(arr);
+}
