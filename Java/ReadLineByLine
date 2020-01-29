@@ -19,7 +19,7 @@ public class tagTextFormatter{
             FileReader fileReader = new FileReader(file);
             BufferedReader bfReader = new BufferedReader(fileReader);
             String line = "";
-            BufferedWriter bw = new BufferedWriter(new FileWriter(newfile, false));
+            BufferedWriter bw = new BufferedWriter(new FileWriter(newfile, false));//append true/false
             
             while((line = bfReader.readLine()) != null){
                 contents += ""; ////내용 채우기
