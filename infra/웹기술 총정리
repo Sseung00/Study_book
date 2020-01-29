@@ -1,0 +1,27 @@
+[WWW의 세가지 요소]
+1. URI : 데이터는 어디에 있는가?
+2. HTTP: 데이터는 어떻게 손에 넣는가?
+3. HTML : 데이터는 어떻게 표현하는가?
+
+[URI: 데이터는 어디에 있는가]
+* 웹 프로그래밍은 서버와 클라이언트를 분업하며, URI(Uniform Resource Identifier)로 연결되어있다.
+* 일반적으로는 URL(Uniform Resource Locator)로 알려져있지만, URI가 보다  포괄적인 개념이다.
+
+[HTTP: 데이터는 어떻게 손에 넣는가]
+* FTP는 메타데이터를 교환하는 포트(21)과 데이터 교환 포트(20)을 쓰고, SMTP(Simple Mail Transfer Protocol)는 메일을 한통 송부할때 클라이언트와 서버 통신이 최소 네번은 필요하다.
+* 위와 비교해 HTTP 포트는 한개이며, 일문일답의 형식으로 매우 간단하다.
+
+[HTML: 데이터는 어떻게 표현하는가]
+* <>와 </> 태그로 텍스트가 둘러싸여 있다.
+* 태그는 중첩 가능하다.
+* URI가 들어간 태그가 있다.
+
+* HTML은 언어를 추가로 넣을 수 있는 언어이다.
+* 'P언어'인 펄(Perl), PHP, Python, Ruby 등 또한 정규 표현이라는 언어 내 언어가 탑재되어있다.
+* 현재 HTML에서 사용되고 있는 필수 언어 내 언어는 HTML, CSS(Cascading Style Sheet), JS 가 있다.
+* CSS는 <style> 태그, JS는 <script> 태그를 사용하여 HTML 안에 작성할 수 있다.
+
+[CSS]
+* CSS는 HTML 요소 = DOM(Document Object Model) 객체를 열거한 후 어떤 스타일을 적용할지의 여부를 {}안 에 열거할 뿐인 스타일 시트이다.
+
+[Javascript]
