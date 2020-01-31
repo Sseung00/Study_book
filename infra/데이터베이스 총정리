@@ -1,0 +1,5 @@
+[RDBMS(Relational DataBase Management System)]
+* 관계모델 : 모든 데이터는 n 항의 관계(릴레이션)로 표현된다 라는 전제를 기반으로 성립하는 모델
+* SQL : Structured Query Language의 약자. DDL(Data Definition Language) / DML(Data Manipulation Language / CRUD(Create, read, update, delete))
+* ER 다이어그램: ERD(Entity-Relationship Diagram)
+* 정규화 : 테이블을 적절히 분할하여 중복이 없고 부정합을 방지하는 구조로 재구성 하는 작업. 적절한 수준의 정규화 및 비정규화 필요.
