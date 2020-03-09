@@ -1,0 +1,434 @@
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import net.sf.jazzlib.ZipEntry;
+import net.sf.jazzlib.ZipInputStream;
+import net.sf.jazzlib.ZipOutputStream;
+
+ 
+public final class ZipFunctions
+{
+    private static final byte[] buf = new byte[1024];
+
+    public static boolean createZipFile( String targetPath , String zipPath , boolean isDirCre ){
+     
+     boolean result = false;
+     File[] files = null;
+     File fTargetPath = new File( targetPath );
+       
+        if ( fTargetPath.isDirectory() ){ //디렉토리인 경우
+            files = fTargetPath.listFiles(); //압축 대상 디렉토리에 저장된 파일리스트 반환
+        }else{ //파일인 경우
+            files = new File[1]; //압축 대상 파일이 하나씩 설정되므로 배열 크기를 1로 한다.
+            files[0] = fTargetPath; //첫 번째 배열에 압축대상 파일경로(경로+파일명)를 전달
+        }
+       
+        File zipSavedDir = null;
+        File path = new File( zipPath );
+        zipSavedDir = new File( path.getParent() ); //압축파일이 저장될 디렉토리 경로 추출
+        if( isDirCre ){
+         zipSavedDir.mkdirs();
+        }
+       
+        ZipOutputStream zipOut = null;
+        try {
+           zipOut = new ZipOutputStream( new FileOutputStream( path ) );
+           result = makeZipFile( files , zipOut , "" ); //파일 압축
+        } catch (FileNotFoundException e) {
+           e.printStackTrace();
+           result = false;
+        } catch (Exception e) {
+           e.printStackTrace();
+           result = false;
+        }finally{
+            if ( zipOut != null ){
+                try{ zipOut.close( ); }catch(IOException e){e.printStackTrace(); }
+            }
+        }
+  
+        return result;
+    }
+
+    public static void main( String[] args ) throws Exception{
+    	 
+    	boolean result;
+
+    	result = ZipFunctions.createZipFile("C:/temp/image/photo-sample.jpg", "C:/temp/zip/photo-sample.jpg.zip");
+
+    	result=ZipFunctions.unZipFile("C:/temp/zip/photo-sample.jpg.zip","C:/temp/zip/",true);System.out.println("unZipFile() 수행결과 : "+result);
+
+    	String str = fileRead("C:/egov_dev/workspace/JavaSample/testdata/case1.xml");
+
+    	byte[] src = str.getBytes("UTF-8");System.out.println("원본 byte배열 사이즈 : "+src.length);
+
+    	byte[] zip = ZipFunctions.compressToZip(src);
+    	byte[] retSrc = ZipFunctions.unZip(zip);System.out.println(new String(retSrc,"UTF-8"));
+
+    	}
+
+    	// 전체 파일 내용 읽어오기
+    	public static String fileRead(String filePath) throws Exception {
+
+    		String line = "", fullLine = "";
+
+    		FileReader fr = new FileReader(filePath);
+    		BufferedReader reader = new BufferedReader(fr);
+    		while ((line = reader.readLine()) != null) {
+    			fullLine += line + "\n";
+    		}
+    		return fullLine;
+    	}
+
+    public static boolean createZipFile( String targetPath , String zipPath ){
+        return createZipFile( targetPath , zipPath , false );
+    }
+
+ 
+
+    public static boolean createZipFile( String[] targetFiles , String zipPath , boolean isDirCre ){
+       
+     boolean result = false;
+     
+     File[] files = new File[targetFiles.length];
+        for ( int i = 0 ; i < files.length ; i++ ){
+            files[ i ] = new File( targetFiles[ i ] );
+        }
+       
+        File path = new File( zipPath );
+        File zipSavedDir = null;
+        zipSavedDir = new File( path.getParent() );
+        if( isDirCre ){
+         zipSavedDir.mkdirs();
+        }
+       
+        ZipOutputStream zipOut = null;
+        try {
+           zipOut = new ZipOutputStream( new FileOutputStream( path ) );
+           result = makeZipFile( files , zipOut , "" ); //파일 압축
+        }catch(FileNotFoundException e){
+           e.printStackTrace();
+           result = false;
+        }finally{
+            if ( zipOut != null ){
+                try{ zipOut.close(); }catch(IOException e){e.printStackTrace(); }
+            }
+        }
+       
+        return result;
+    }
+
+ 
+
+    public static boolean createZipFile( String[] targetFile , String zipPath ){
+        return createZipFile( targetFile , zipPath , false );
+    }
+
+ 
+
+    public static boolean createByteArrZipFile( byte[] src , String zipPath , String entryName , boolean isDirCre ){
+       
+        boolean result;
+     
+        File path = new File( zipPath );
+        File zipSavedDir = null;
+       
+        zipSavedDir = new File( path.getParent( ) );
+        if ( isDirCre ){
+          zipSavedDir.mkdirs( );
+        }
+       
+        ZipOutputStream zipOut = null;
+       
+        try{
+            zipOut = new ZipOutputStream( new FileOutputStream( path ) ); // 압축 파일의 OutputStream
+            result = makeByteArrZipFile( src , zipOut , "" , entryName ); // 압축 파일 압축
+        }catch(IOException e){
+            e.printStackTrace();
+            result = false;
+        }finally{
+           try{
+               if ( zipOut != null ){
+                  zipOut.closeEntry( );
+                  zipOut.close( ); // OutputStream 을 닫음으로서 압축파일 생성
+               }
+          }catch(IOException e){
+              e.printStackTrace();
+          }
+       }
+  
+       return result;
+    }
+   
+    public static boolean makeByteArrZipFile( byte[] src , ZipOutputStream zipOut , String targetDir , String entryName ){
+     
+     boolean result;
+     
+     try{
+       zipOut.putNextEntry( new ZipEntry( targetDir + "/" + entryName ) );
+       zipOut.write( src );
+       result = true;
+     }catch(IOException e){
+       e.printStackTrace();
+       result = false;
+     }
+        
+     return result;
+    }
+
+
+    public static boolean unZipFile( String targetZip , String completeDir , boolean isDirCre ){
+     
+        boolean result;
+        ZipInputStream in = null;
+       
+        try{
+            File fCompleteDir = null;
+            fCompleteDir = new File( completeDir );
+            if ( isDirCre )
+            {
+                fCompleteDir.mkdirs( ); // 디렉토리가 없을경우 생성
+            }
+            in = new ZipInputStream( new FileInputStream( targetZip ) ); // 압축파일의 InputStream을 읽어들임
+            ZipEntry entry = null;
+            while( ( entry = in.getNextEntry( ) ) != null ){ // InputStream내 압축된 파일들을 하나씩 읽어들임.
+           
+                String entryName = entry.getName( ); // 압축파일의 구조와 동일하게 가기위해 로컬의 디렉토리 구조를 만듬.
+                if ( entry.getName( ).lastIndexOf( "/" ) > 0 ){
+                    String mkDirNm = entryName.substring( 0 , entryName.lastIndexOf( "/" ) );
+                    new File( completeDir + mkDirNm ).mkdirs( );
+                }
+               
+                int bytes_read;
+                FileOutputStream out = null;
+                out = new FileOutputStream( completeDir + entry.getName( ) ); // 압축해제할 각각 파일의 OutputStream을 생성
+                while ( ( bytes_read = in.read( buf ) ) != - 1 ){
+                     out.write( buf , 0 , bytes_read );
+                }
+               
+                if ( out != null ) out.close( ); //하나의 파일이 압축해제됨
+            }
+           
+            result = true;
+           
+        }catch (FileNotFoundException e) {
+            e.printStackTrace();
+            result = false;
+        }catch (IOException e) {
+            e.printStackTrace();
+            result = false;
+        }finally{
+            try{
+               if ( in != null ) in.close( ); // 모든 파일이 압축이 해제되면 InputStream을 닫는다.
+            } catch (IOException e) {
+               e.printStackTrace();
+            }
+       }
+        
+       return result;
+    }
+
+ 
+
+    public static boolean unZipFile( String targetZip , String completeDir ){
+        return unZipFile( targetZip , completeDir , false );
+    }
+
+
+    public static byte[] compressToZip( byte[] src ){
+       
+     byte[] retSrc = null;
+        ByteArrayOutputStream baos = null;
+        ByteArrayInputStream bais = null;
+        ZipOutputStream zos = null;
+
+        try{
+            bais = new ByteArrayInputStream( src );
+            baos = new ByteArrayOutputStream( );
+            zos = new ZipOutputStream( baos );
+            zos.putNextEntry( new ZipEntry( "temp.tmp" ) );
+            int bytes_read = 0;
+            while ( ( bytes_read = bais.read( buf ) ) != - 1 ){
+                   zos.write( buf , 0 , bytes_read );
+            }
+           bais.close( );
+           zos.close( );
+           retSrc = baos.toByteArray( ); //InputStream과 OutputStream을 모두 닫은 후에 압축된 byte배열을 얻는다.
+
+        }catch (IOException e) {
+           e.printStackTrace();
+        }finally{
+          try{
+            if ( bais != null ) bais.close( );
+            if ( zos != null ) zos.close( );
+            if ( baos != null ) baos.close( );
+          }catch (IOException e) {
+            e.printStackTrace();
+          }
+        }
+       
+        return retSrc;
+    }
+
+ 
+
+    // 압축된 byte 배열을 받아서 zipPath위치에 zip 파일을 생성한다.
+    private static boolean makeZipFile( byte[] src , String zipPath ){
+     
+        boolean result;
+        FileOutputStream fos = null;
+        ByteArrayInputStream bais = null;
+       
+        try{
+            fos = new FileOutputStream( zipPath );
+            bais = new ByteArrayInputStream( src );
+            int bytes_read = 0;
+            while ( ( bytes_read = bais.read( buf ) ) != - 1 ){
+                fos.write( buf , 0 , bytes_read );
+            }
+           
+            result = true;
+        }catch( FileNotFoundException e ){
+           e.printStackTrace();
+           result = false;
+        }catch (IOException e) {
+           e.printStackTrace();
+           result = false;
+        }finally{
+           try{
+             if ( fos != null ) fos.close();
+             if ( bais != null ) bais.close();
+           }catch(IOException e){
+             e.printStackTrace();
+       }
+    }
+  
+    return result;
+  }
+
+
+    public static byte[] unZip( byte[] src ){
+     
+        byte[] retSrc = null;
+        ByteArrayOutputStream baos = null;
+        ZipInputStream zis = null;
+        int bytes_read = 0;
+       
+        try
+        {
+            zis = new ZipInputStream( new ByteArrayInputStream( src ) );
+            baos = new ByteArrayOutputStream( );
+            zis.getNextEntry( ); // entry는 하나밖에 없음을 보장
+            while ( ( bytes_read = zis.read( buf ) ) != - 1 ){
+                baos.write( buf , 0 , bytes_read );
+            }
+           
+            retSrc = baos.toByteArray( );
+        }catch (IOException e){
+            e.printStackTrace();
+        }finally{
+            try{
+                if ( baos != null ) baos.close();
+                if ( zis != null ) zis.close();
+            }catch(IOException e){
+                e.printStackTrace();
+            }
+       }
+  
+       return retSrc;
+    }
+
+ 
+
+    // 문자열을 압축하여 byte배열로 리턴(UTF-8)
+    public static byte[] compressToZip( String src ){
+     
+      byte[] result = null;
+     
+      try {
+         result = compressToZip( src.getBytes( "UTF-8" ) );
+      } catch (UnsupportedEncodingException e) {
+         e.printStackTrace();
+      }
+     
+      return result;
+    }
+
+ 
+
+    // byte 배열을 압축하여 압축파일로 생성
+    public static boolean srcToZipFile( byte[] src , String zipPath ){
+        byte[] retSrc = null;
+        retSrc = compressToZip( src ); //압축
+        return makeZipFile( retSrc , zipPath ); //파일로 만듬
+    }
+
+    // byte 배열을 압축하여 압축파일로 생성
+    public static boolean srcToZipFile( String src , String zipPath ){
+        byte[] retSrc = null;
+        try {
+            retSrc = compressToZip( src.getBytes( "UTF-8" ) ); //압축
+        } catch (UnsupportedEncodingException e) {
+           e.printStackTrace();
+        }
+  
+        return makeZipFile( retSrc , zipPath ); //파일로 만듬
+    }
+
+   
+
+    // 압축파일을 해제 후 byte배열로 리턴
+    public static byte[] zipFileToSrc( String zipPath ){
+        byte[] retSrc = null;
+        return retSrc;
+    }
+
+ 
+
+    public static boolean makeZipFile( File[] files , ZipOutputStream zipOut , String targetDir ){
+       
+     boolean result = false;
+     
+     for ( int i = 0 ; i < files.length ; i++ ){
+            File compPath = new File( files[ i ].getPath( ) );
+            if ( compPath.isDirectory( ) ){
+                File[] subFiles = compPath.listFiles( );
+                makeZipFile( subFiles , zipOut , targetDir + compPath.getName( ) + "/" );
+                continue;
+            }
+           
+            FileInputStream in = null;
+            try{
+                in = new FileInputStream( compPath );
+                zipOut.putNextEntry( new ZipEntry( targetDir + "/" + files[ i ].getName( ) ) );
+                int data;
+                while ( ( data = in.read( buf ) ) > 0 ){
+                    zipOut.write( buf , 0 , data );
+                }
+               
+                result = true;
+               
+            } catch (FileNotFoundException e) {
+               e.printStackTrace();
+               result = false;
+            } catch (IOException e) {
+               e.printStackTrace();
+               result = false;
+            }finally{
+               try{
+                  zipOut.closeEntry();
+                  if( in != null ) in.close( );  
+               }catch(IOException e){
+                  e.printStackTrace();
+            }
+          }
+        }
+       return result;
+    }
+}
