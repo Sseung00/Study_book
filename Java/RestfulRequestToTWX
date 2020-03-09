@@ -1,0 +1,75 @@
+//required lib
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import org.apache.tomcat.util.codec.binary.Base64;
+import org.json.simple.parser.JSONParser;
+
+public class GetDataFromTWX{
+    private String auth = "develop2:ptc";
+    
+    public GetDataFromTWX(){}
+    
+    public String makeArags(String dbIndex, String areaId, String equipmentId, int areakey, int equipmentkey, String type){
+    JSONObject args = new JSONObject();
+    args.put("dbIndex", dbIndex);
+    args.put("areaId", areaId);
+    args.put("equipmentId", equipmnetId);
+    args.put("areakey", areakey);
+    args.put("type", type);
+    
+    return args.toJSONString();
+    }
+    
+    public String makeThrmChartRequest(String args, int mptkey, int aoi){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("args", args);
+        jsonObject.pur("aoi", aoi);
+        jsonObject.put("mptkey", mptkey);
+        
+        return jsonObject.toJSONString();
+    }
+    
+    public JSONObject getResponseFromTWX(String jsonValue, String URLString){
+    BufferedReader in = null;
+    StringBuffer buffer = null;
+    String result = "";
+    try{
+        result = URLEncoder.encode(result, "UTF-8");
+        URL url = new URL(URLString);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        byte[] authEncBytes = Base64.encodeBase(auth.getBytes());
+        String authStringEnc = new String(authEncBytes);
+        conn.setDoOutput(true);
+        conn.setRequestProperty("Authorization", "Basic" + authStringEnc);
+        conn.setRequestMethod("POST");
+        conn.setRequestProperty("Content-Type", "application/json");
+        conn.setRequestProperty("Accept", "application/json-compressed");
+        conn.setRequestProperty("_twsr", "1");
+        
+        OutputStream os = conn.getOutputStream();
+        os.write(jsonValue.getBytes("UTF-8"));
+        os.flush();
+        
+        in = new BufferReader(new InputStreamReader(conn.getInputStream(), "UTF-8"));
+        buffer = new StringBuffer();
+        String line;
+        while((line = in.readLine()) != null){
+            buffer.append(line);
+        }
+        
+        JSONParser parser = new JSONParser();
+        Object obj = parser.parse(buffer.toString());
+        JSONObject resultJsonObj = (JSONObject) obj;
+        return resultJsonObj;
+    }catch(Exception e){
+        e.printStackTrace();
+    }finally{
+        if(in != null) try{ in.close(); }catch(Exception e){ e.printStackTrace(); }
+    }
+    return null;
+    }
+}
