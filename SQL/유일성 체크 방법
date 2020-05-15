@@ -1,0 +1,6 @@
+-- 체크할 컬럼들로 그룹 바이를 해서 카운트가 1 초과하는 것이 없으면 유일한 조합인 것
+
+select dbindex, equipmentkey, count(*)
+from equipment
+group by dbindex, equipmentkey
+having count(*) > 1
